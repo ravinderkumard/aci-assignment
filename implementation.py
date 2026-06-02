@@ -1,4 +1,5 @@
 # Imports
+import heapq
 
 # Graph Functions
 def read_graph(filename: str):
@@ -13,6 +14,8 @@ def read_graph(filename: str):
 
             for _ in range(m):
                 line = file.readline().strip()
+                if not line:
+                    continue
                 u,v,w = map(int,line.split())
 
                 if u<0 or u>=n:
@@ -37,11 +40,71 @@ def read_graph(filename: str):
             return graph,source,dest
     except FileNotFoundError:
         print("Input file not found")
-    
+
 # Input Parser
 
 # Dijkstra Algorithm
+def reconstruct_path(parent, source, destination):
 
+    path = []
+
+    current = destination
+
+    while current is not None:
+        path.append(current)
+        current = parent[current]
+
+    path.reverse()
+
+    if path[0] != source:
+        return None
+
+    return path
+
+def dijkstra(graph,source,destination):
+    dist = {
+        node: float('inf')
+        for node in graph
+    }
+    parent = {
+        node: None
+        for node in graph
+    }
+    dist[source] = 0
+
+    pq = [(0,source)]
+    while pq:
+        current_dist,current_node = heapq.heappop(pq)
+        if current_dist>dist[current_node]:
+            continue
+        if current_node == destination:
+            break
+        for neighbor,weight in graph[current_node]:
+            new_dist = current_dist + weight
+            if new_dist < dist[neighbor]:
+                dist[neighbor] = new_dist
+                parent[neighbor] = current_node
+
+                heapq.heappush(pq,
+                               (new_dist,neighbor))
+    
+    if dist[destination] == float('inf'):
+        return None,None
+    path = reconstruct_path(parent,source,destination)
+    return path,dist[destination]
+
+def format_path(path):
+    return " -> ".join(
+        map(str, path)
+    )
+graph, source, destination = read_graph("inputPS13.txt")
+
+print(graph)
+print("Source:", source)
+print("Destination:", destination)
+path, cost = dijkstra(graph,source,destination)
+print("Path:",format_path(path))
+print("Cost:",cost)
 # Output Writer
 
 # Main Function
