@@ -1,0 +1,17 @@
+Scenario 1
+Best Path: 0 -> 1 -> 2 -> 4
+Minimum Latency: 6
+Covergence Iteration: 1
+
+Scenario 2
+Best Path: 0 -> 1 -> 2 -> 4
+Minimum Latency: 6
+Covergence Iteration: 1
+
+DIJKSTRA 
+Best Path: 0 -> 4
+Minimum Latency: 6
+
+Comparison
+Both scenario converged at the same iteration
+Dijkstra Optimal Cost: 6

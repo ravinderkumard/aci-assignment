@@ -213,6 +213,203 @@ for i in range(10):
     )
 
     print(path)
-# Output Writer
 
-# Main Function
+def calculate_cost(path,graph):
+    if path is None:
+        return float('inf')
+    total_cost = 0
+    for i in range(len(path)-1):
+        current_node = path[i]
+        next_node = path[i+1]
+
+        edge_found = False
+
+        for neighbor,weight in graph[current_node]:
+            if neighbor == next_node:
+                total_cost+=weight
+                edge_found = True
+                break
+        if not edge_found:
+            raise ValueError(f"Edge ({current_node},{next_node}) not found in graph")
+        
+    return total_cost
+
+path = [0,1,2,4]
+cost = calculate_cost(path,graph)
+print(f"Cost : {cost}")
+
+def evaporate_pheromones(pheromone,rho):
+    for edge in pheromone:
+        pheromone[edge]*=(1-rho)
+
+def deposit_pheromones(pheromone,ant_solutions,Q):
+    for path,cost in ant_solutions:
+        if path is None:
+            continue
+
+        if cost ==0:
+            continue
+
+        delta_tau = Q/cost
+
+        for i in range(len(path)-1):
+            u = path[i]
+            v = path[i+1]
+            pheromone[(u,v)]+=delta_tau
+            
+            pheromone[(v,u)]+=delta_tau
+
+# ACO Function
+def ant_colony_optimization(graph,source,destination,num_ants,alpha,beta,rho,iterations,Q):
+    pheromone = initialize_pheromones(graph)
+    heuristic = initialize_heuristic(graph)
+
+    best_path = None
+    best_cost = float('inf')
+    
+    convergence_iteration = 0
+
+    for iteration in range(iterations):
+        ant_solutions = []
+        iteration_best_cost = float('inf')
+        for _ in range(num_ants):
+            path = construct_ant_path(graph,source,destination,pheromone,heuristic,alpha,beta)
+            if path is None:
+                continue
+            cost = calculate_cost(path,graph)
+
+            ant_solutions.append((path,cost))
+
+            if cost < iteration_best_cost:
+                iteration_best_cost = cost
+
+            if cost < best_cost:
+                best_cost = cost
+                best_path = path
+
+                convergence_iteration = iteration+1
+
+        evaporate_pheromones(pheromone,rho)
+
+        deposit_pheromones(pheromone,ant_solutions,Q)
+
+    return (best_path,best_cost,convergence_iteration)
+
+best_path_1,best_cost_1,conv_1 = (ant_colony_optimization(
+    graph,
+    source,
+    destination,
+    num_ants=10,
+    alpha=1.0,
+    beta=2.0,
+    rho=0.5,
+    iterations=100,
+    Q=100
+))
+
+print(f"Scenario 1: Path: {format_path(best_path_1)}")
+print(f"Cost : {best_cost_1}")
+print(f"Convergence: {conv_1}")
+
+
+best_path_2,best_cost_2,conv_2 = (ant_colony_optimization(
+    graph,
+    source,
+    destination,
+    num_ants=10,
+    alpha=2.5,
+    beta=1.0,
+    rho=0.3,
+    iterations=100,
+    Q=100
+))
+
+print(f"Scenario 2: Path: {format_path(best_path_2)}")
+print(f"Cost : {best_cost_2}")
+print(f"Convergence: {conv_2}")
+
+dijkstra_path, dijkstra_cost = dijkstra(
+    graph,
+    source,
+    destination
+)
+print("\nDijkstra")
+print("Path:", format_path(dijkstra_path))
+print("Cost:", dijkstra_cost)
+
+
+# Create Output Writer
+def write_output(filename,scenario1,scenario2,dijkstra_result):
+    with open(filename,"w") as file:
+        path1, cost1, conv1 = scenario1
+        path2, cost2, conv2 = scenario2
+        d_path,d_cost = dijkstra_result
+
+        file.write("Scenario 1\n")
+        file.write(f"Best Path: {format_path(path1)}\n")
+        file.write(f"Minimum Latency: {cost1}\n")
+        file.write(f"Covergence Iteration: {conv1}\n\n")
+        
+        file.write("Scenario 2\n")
+        file.write(f"Best Path: {format_path(path2)}\n")
+        file.write(f"Minimum Latency: {cost2}\n")
+        file.write(f"Covergence Iteration: {conv2}\n\n")
+        
+        file.write("DIJKSTRA \n")
+        file.write(f"Best Path: {format_path(d_path)}\n")
+        file.write(f"Minimum Latency: {d_cost}\n\n")
+        
+        file.write("Comparison\n")
+        if conv1<conv2:
+            file.write("Scenario 1 converged faster than scenario 2\n")
+        elif conv2 <conv1:
+            file.write("Scenario 2 converged faster than Scenario 1\n")
+        else:
+            file.write("Both scenario converged at the same iteration\n")
+
+        file.write(f"Dijkstra Optimal Cost: {d_cost}\n")
+
+
+#Main
+graph,source,destination = read_graph("inputPS13.txt")
+
+dijkstra_path,dijkstra_cost = dijkstra(graph,source,destination)
+
+scenario1 = ant_colony_optimization(graph,
+                                    source,
+                                    destination,
+                                    num_ants=10,
+                                    alpha=1.0,
+                                    beta=2.0,
+                                    rho=0.5,
+                                    iterations=100,
+                                    Q=100)
+
+scenario2 = ant_colony_optimization(graph,
+                                    source,
+                                    destination,
+                                    num_ants=10,
+                                    alpha=2.5,
+                                    beta=1.0,
+                                    rho=0.3,
+                                    iterations=100,
+                                    Q=100)
+
+write_output(
+    "outputPS13.txt",
+    scenario1,
+    scenario2,
+    (dijkstra_path,dijkstra_cost)
+)
+
+print("\nDijkstra")
+print(format_path(dijkstra_path))
+print(dijkstra_cost)
+
+print("\nScenario 1")
+print(format_path(scenario1[0]))
+print(scenario1[1])
+
+print("\nScenario 2")
+print(format_path(scenario2[0]))
+print(scenario2[1])
