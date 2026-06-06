@@ -6,7 +6,7 @@ Implementation of Dijkstra's Algorithm and Ant Colony Optimization (ACO)
 # Imports
 import heapq
 import random
-
+import sys
 # ==========================================
 # Graph & Utility Functions
 # ==========================================
@@ -58,7 +58,7 @@ def read_graph(filename: str):
             
             return graph,source,dest
     except FileNotFoundError:
-        print("Input file not found")
+        print("Input file not found. Please provide an input file!")
         sys.exit(1)
 
 # Input Parser
