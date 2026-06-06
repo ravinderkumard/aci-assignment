@@ -59,6 +59,7 @@ def read_graph(filename: str):
             return graph,source,dest
     except FileNotFoundError:
         print("Input file not found")
+        sys.exit(1)
 
 # Input Parser
 
