@@ -461,45 +461,30 @@ def write_output(filename,scenario1,scenario2,dijkstra_result):
 # ==========================================
 # Main Execution Block
 # ==========================================
-graph,source,destination = read_graph("inputPS13.txt")
+if __name__ == "__main__":
+    
+    # 1. Initialization
+    graph, source, destination = read_graph("inputPS13.txt")
 
-dijkstra_path,dijkstra_cost = dijkstra(graph,source,destination)
+    # 2. Baseline Deterministic Run
+    dijkstra_path, dijkstra_cost = dijkstra(graph, source, destination)
 
-scenario1 = ant_colony_optimization(graph,
-                                    source,
-                                    destination,
-                                    num_ants=10,
-                                    alpha=1.0,
-                                    beta=2.0,
-                                    rho=0.5,
-                                    iterations=100,
-                                    Q=100)
+    # 3. ACO Scenario 1 (Heuristic Favoring)
+    scenario1 = ant_colony_optimization(
+        graph, source, destination,
+        num_ants=10, alpha=1.0, beta=2.0, rho=0.5, iterations=100, Q=100
+    )
 
-scenario2 = ant_colony_optimization(graph,
-                                    source,
-                                    destination,
-                                    num_ants=10,
-                                    alpha=2.5,
-                                    beta=1.0,
-                                    rho=0.3,
-                                    iterations=100,
-                                    Q=100)
+    # 4. ACO Scenario 2 (Pheromone Favoring)
+    scenario2 = ant_colony_optimization(
+        graph, source, destination,
+        num_ants=10, alpha=2.5, beta=1.0, rho=0.3, iterations=100, Q=100
+    )
 
-write_output(
-    "outputPS13.txt",
-    scenario1,
-    scenario2,
-    (dijkstra_path,dijkstra_cost)
-)
-
-print("\nDijkstra")
-print(format_path(dijkstra_path))
-print(dijkstra_cost)
-
-print("\nScenario 1")
-print(format_path(scenario1[0]))
-print(scenario1[1])
-
-print("\nScenario 2")
-print(format_path(scenario2[0]))
-print(scenario2[1])
+    # 5. Output Results
+    write_output(
+        "outputPS13.txt",
+        scenario1,
+        scenario2,
+        (dijkstra_path, dijkstra_cost)
+    )
