@@ -1,9 +1,27 @@
+"""
+Assignment 1 - PS13 - Communication Networks
+Implementation of Dijkstra's Algorithm and Ant Colony Optimization (ACO)
+"""
+
 # Imports
 import heapq
 import random
 
-# Graph Functions
+# ==========================================
+# Graph & Utility Functions
+# ==========================================
 def read_graph(filename: str):
+    """
+    Parses the input file to generate the graph, source, and destination nodes.
+    Expects the file to start with the number of nodes and edges, followed by
+    the edge definitions, and ending with the source and destination nodes.
+    
+    Args:
+        filename (str): The path to the input text file.
+        
+    Returns:
+        tuple: (graph dictionary, source node, destination node)
+    """
     graph = {}
     try:
         with open(filename,"r") as file:
@@ -44,8 +62,14 @@ def read_graph(filename: str):
 
 # Input Parser
 
-# Dijkstra Algorithm
+# ==========================================
+# Deterministic Algorithm: Dijkstra
+# ==========================================
 def reconstruct_path(parent, source, destination):
+    """
+    Backtracks from the destination node to the source using the parent dictionary
+    to reconstruct the shortest path taken by Dijkstra's algorithm.
+    """
 
     path = []
 
@@ -63,6 +87,17 @@ def reconstruct_path(parent, source, destination):
     return path
 
 def dijkstra(graph,source,destination):
+    """
+    Finds the absolute minimum latency path using Dijkstra's deterministic algorithm.
+    
+    Args:
+        graph (dict): The adjacency list representing the network.
+        source (int): Starting router.
+        destination (int): Target router.
+        
+    Returns:
+        tuple: (Shortest path as a list, Minimum latency cost)
+    """
     dist = {
         node: float('inf')
         for node in graph
@@ -95,6 +130,17 @@ def dijkstra(graph,source,destination):
     return path,dist[destination]
 
 def format_path(path):
+    """
+    Formats the path list into a readable string format.
+    
+    Args:
+        path (list): List of nodes representing the path.
+        
+    Returns:
+        str: Formatted string (e.g., "0 -> 1 -> 2")
+    """
+    if path is None:
+        return "No Valid Path Found"
     return " -> ".join(
         map(str, path)
     )
@@ -107,8 +153,13 @@ path, cost = dijkstra(graph,source,destination)
 print("Path:",format_path(path))
 print("Cost:",cost)
 
-#Initialize Pheromones for path between current node and neighbor node.
+# ==========================================
+# Meta-Heuristic Algorithm: Ant Colony Optimization
+# ==========================================
 def initialize_pheromones(graph):
+    """
+    Initializes the pheromone levels (tau) on all edges to a baseline value of 1.0.
+    """
     pheromone = {}
     for node in graph:
         for neighbor,weight in graph[node]:
@@ -121,6 +172,10 @@ print(f"Pheromones: {pheromone}")
 
 #Initialize Heuristic between nodes
 def initialize_heuristic(graph):
+    """
+    Calculates the heuristic desirability (eta) for all edges.
+    Defined as the inverse of the edge latency.
+    """
     heuristic = {}
 
     for node in graph:
@@ -135,8 +190,11 @@ for edge, value in heuristic.items():
     print(edge, round(value, 3))
 
 
-# How ant chooses the next route.
 def choose_next_node(current_node,candidates,pheromone,heuristic,alpha,beta):
+    """
+    Probabilistically selects the next node for an ant to move to, 
+    based on the pheromone trail and heuristic desirability.
+    """
     if not candidates:
         return None
     
@@ -171,8 +229,10 @@ for _ in range(10):
         )
     )
 
-# Single ant to travel from the source router to the destination router.
 def construct_ant_path(graph,source,destination,pheromone,heuristic,alpha,beta):
+    """
+    Simulates a single ant traversing the network from source to destination.
+    """
     current_node = source
     path = [source]
     visited = set()
@@ -182,13 +242,17 @@ def construct_ant_path(graph,source,destination,pheromone,heuristic,alpha,beta):
     while current_node!=destination:
         candidates = []
         steps+=1
+        
+        # Prevent infinite loops in cyclic graphs
         if steps>max_steps:
             return None
-        
+            
+        # Identify valid, unvisited neighbors
         for neighbor,weight in graph[current_node]:
             if neighbor not in visited:
                 candidates.append(neighbor)
 
+        # Dead end reached
         if not candidates:
             return None
         
@@ -215,6 +279,9 @@ for i in range(10):
     print(path)
 
 def calculate_cost(path,graph):
+    """
+    Calculates the total latency of a given path.
+    """
     if path is None:
         return float('inf')
     total_cost = 0
@@ -239,10 +306,18 @@ cost = calculate_cost(path,graph)
 print(f"Cost : {cost}")
 
 def evaporate_pheromones(pheromone,rho):
+    """
+    Applies the evaporation rate to all existing pheromones in the network.
+    Formula: tau = tau * (1 - rho)
+    """
     for edge in pheromone:
         pheromone[edge]*=(1-rho)
 
 def deposit_pheromones(pheromone,ant_solutions,Q):
+    """
+    Deposits new pheromones on the trails utilized by the ants in the current iteration.
+    Ants with shorter paths (lower latency cost) deposit more pheromone.
+    """
     for path,cost in ant_solutions:
         if path is None:
             continue
@@ -255,12 +330,19 @@ def deposit_pheromones(pheromone,ant_solutions,Q):
         for i in range(len(path)-1):
             u = path[i]
             v = path[i+1]
+            # Since graph is undirected, update both directions
             pheromone[(u,v)]+=delta_tau
             
             pheromone[(v,u)]+=delta_tau
 
 # ACO Function
 def ant_colony_optimization(graph,source,destination,num_ants,alpha,beta,rho,iterations,Q):
+    """
+    Orchestrates the overall Ant Colony Optimization meta-heuristic process.
+    
+    Returns:
+        tuple: (best_path, best_cost, convergence_iteration)
+    """
     pheromone = initialize_pheromones(graph)
     heuristic = initialize_heuristic(graph)
 
@@ -272,6 +354,8 @@ def ant_colony_optimization(graph,source,destination,num_ants,alpha,beta,rho,ite
     for iteration in range(iterations):
         ant_solutions = []
         iteration_best_cost = float('inf')
+
+        # Send out the fleet of ants
         for _ in range(num_ants):
             path = construct_ant_path(graph,source,destination,pheromone,heuristic,alpha,beta)
             if path is None:
@@ -283,12 +367,14 @@ def ant_colony_optimization(graph,source,destination,num_ants,alpha,beta,rho,ite
             if cost < iteration_best_cost:
                 iteration_best_cost = cost
 
+            # Global best tracker
             if cost < best_cost:
                 best_cost = cost
                 best_path = path
-
+                # Record when the new optimal path is discovered
                 convergence_iteration = iteration+1
 
+        # Environment update step
         evaporate_pheromones(pheromone,rho)
 
         deposit_pheromones(pheromone,ant_solutions,Q)
@@ -338,7 +424,9 @@ print("Path:", format_path(dijkstra_path))
 print("Cost:", dijkstra_cost)
 
 
-# Create Output Writer
+# ==========================================
+# Output Generation
+# ==========================================
 def write_output(filename,scenario1,scenario2,dijkstra_result):
     with open(filename,"w") as file:
         path1, cost1, conv1 = scenario1
@@ -370,7 +458,9 @@ def write_output(filename,scenario1,scenario2,dijkstra_result):
         file.write(f"Dijkstra Optimal Cost: {d_cost}\n")
 
 
-#Main
+# ==========================================
+# Main Execution Block
+# ==========================================
 graph,source,destination = read_graph("inputPS13.txt")
 
 dijkstra_path,dijkstra_cost = dijkstra(graph,source,destination)
