@@ -1,5 +1,5 @@
 Scenario 1
-Best Path: 0 -> 1 -> 2 -> 4
+Best Path: 0 -> 4
 Minimum Latency: 6
 Covergence Iteration: 1
 

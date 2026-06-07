@@ -147,12 +147,12 @@ def format_path(path):
     )
 graph, source, destination = read_graph("inputPS13.txt")
 
-print(graph)
-print("Source:", source)
-print("Destination:", destination)
+# print(graph)
+# print("Source:", source)
+# print("Destination:", destination)
 path, cost = dijkstra(graph,source,destination)
-print("Path:",format_path(path))
-print("Cost:",cost)
+# print("Path:",format_path(path))
+# print("Cost:",cost)
 
 # ==========================================
 # Meta-Heuristic Algorithm: Ant Colony Optimization
@@ -169,7 +169,7 @@ def initialize_pheromones(graph):
     return pheromone
 
 pheromone = initialize_pheromones(graph)
-print(f"Pheromones: {pheromone}")
+# print(f"Pheromones: {pheromone}")
 
 #Initialize Heuristic between nodes
 def initialize_heuristic(graph):
@@ -187,8 +187,8 @@ def initialize_heuristic(graph):
 
 heuristic = initialize_heuristic(graph)
 
-for edge, value in heuristic.items():
-    print(edge, round(value, 3))
+# for edge, value in heuristic.items():
+#     print(edge, round(value, 3))
 
 
 def choose_next_node(current_node,candidates,pheromone,heuristic,alpha,beta):
@@ -217,18 +217,18 @@ def choose_next_node(current_node,candidates,pheromone,heuristic,alpha,beta):
     next_node = random.choices(candidates,weights=probabilities,k=1)[0]
     return next_node
 
-for _ in range(10):
+# for _ in range(10):
 
-    print(
-        choose_next_node(
-            0,
-            [1, 2, 4],
-            pheromone,
-            heuristic,
-            alpha=1.0,
-            beta=2.0
-        )
-    )
+#     print(
+#         choose_next_node(
+#             0,
+#             [1, 2, 4],
+#             pheromone,
+#             heuristic,
+#             alpha=1.0,
+#             beta=2.0
+#         )
+#     )
 
 def construct_ant_path(graph,source,destination,pheromone,heuristic,alpha,beta):
     """
@@ -277,7 +277,7 @@ for i in range(10):
         beta=2.0
     )
 
-    print(path)
+    # print(path)
 
 def calculate_cost(path,graph):
     """
@@ -304,7 +304,7 @@ def calculate_cost(path,graph):
 
 path = [0,1,2,4]
 cost = calculate_cost(path,graph)
-print(f"Cost : {cost}")
+# print(f"Cost : {cost}")
 
 def evaporate_pheromones(pheromone,rho):
     """
@@ -394,9 +394,9 @@ best_path_1,best_cost_1,conv_1 = (ant_colony_optimization(
     Q=100
 ))
 
-print(f"Scenario 1: Path: {format_path(best_path_1)}")
-print(f"Cost : {best_cost_1}")
-print(f"Convergence: {conv_1}")
+# print(f"Scenario 1: Path: {format_path(best_path_1)}")
+# print(f"Cost : {best_cost_1}")
+# print(f"Convergence: {conv_1}")
 
 
 best_path_2,best_cost_2,conv_2 = (ant_colony_optimization(
@@ -411,18 +411,18 @@ best_path_2,best_cost_2,conv_2 = (ant_colony_optimization(
     Q=100
 ))
 
-print(f"Scenario 2: Path: {format_path(best_path_2)}")
-print(f"Cost : {best_cost_2}")
-print(f"Convergence: {conv_2}")
+# print(f"Scenario 2: Path: {format_path(best_path_2)}")
+# print(f"Cost : {best_cost_2}")
+# print(f"Convergence: {conv_2}")
 
 dijkstra_path, dijkstra_cost = dijkstra(
     graph,
     source,
     destination
 )
-print("\nDijkstra")
-print("Path:", format_path(dijkstra_path))
-print("Cost:", dijkstra_cost)
+# print("\nDijkstra")
+# print("Path:", format_path(dijkstra_path))
+# print("Cost:", dijkstra_cost)
 
 
 # ==========================================
